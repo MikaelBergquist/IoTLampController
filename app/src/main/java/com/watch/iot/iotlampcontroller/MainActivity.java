@@ -55,7 +55,7 @@ public class MainActivity extends WearableActivity
         setAmbientEnabled();
 
         mContainerView = (BoxInsetLayout) findViewById(R.id.container);
-        ImageView img = (ImageView) findViewById(R.id.lamp);
+        ImageView img = (ImageView) findViewById(R.id.big_lightbulb);
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
