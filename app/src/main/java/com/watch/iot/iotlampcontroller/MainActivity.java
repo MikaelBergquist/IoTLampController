@@ -45,6 +45,7 @@ public class MainActivity extends WearableActivity
     private GoogleApiClient mGoogleApiClient;
     private static final String COUNT_KEY = "com.example.key.count";
     private int count = 0;
+    private int id = -1;
     //public DataLayerListenerService mService;
     private boolean mBound = false;
 
@@ -65,6 +66,19 @@ public class MainActivity extends WearableActivity
             }
         });
 
+        if (savedInstanceState == null) {
+            Bundle extras = getIntent().getExtras();
+            if(extras == null) {
+
+            } else {
+                id= extras.getInt("id");
+                TextView tv = (TextView) findViewById(R.id.text);
+                tv.setText("intent:" + id);
+
+            }
+        } else {
+            id= (int) savedInstanceState.getSerializable("id");
+        }
 
 //        Google API klient som behövs för att skicka data till det speciella molnet.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -191,8 +205,7 @@ public class MainActivity extends WearableActivity
     //method to update count
     private void updateCount(int c){
         count = c;
-        TextView tv = (TextView) findViewById(R.id.text);
-        tv.setText(count+"");
+
     }
 
     @Override
