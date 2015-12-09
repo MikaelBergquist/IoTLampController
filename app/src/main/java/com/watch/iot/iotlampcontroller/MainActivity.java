@@ -1,6 +1,11 @@
 package com.watch.iot.iotlampcontroller;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
 import android.util.Log;
@@ -24,10 +29,12 @@ import com.google.android.gms.wearable.Wearable;
 
 
 
-public class MainActivity extends WearableActivity implements
+public class MainActivity extends WearableActivity
+        implements
         DataApi.DataListener,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.OnConnectionFailedListener
+{
 
 
     private BoxInsetLayout mContainerView;
@@ -36,6 +43,8 @@ public class MainActivity extends WearableActivity implements
     private GoogleApiClient mGoogleApiClient;
     private static final String COUNT_KEY = "com.example.key.count";
     private int count = 0;
+    public DataLayerListenerService mService;
+    private boolean mBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,44 +53,46 @@ public class MainActivity extends WearableActivity implements
         setAmbientEnabled();
 
         mContainerView = (BoxInsetLayout) findViewById(R.id.container);
-        ImageView imgFavorite = (ImageView) findViewById(R.id.lamp);
-        imgFavorite.setOnClickListener(new View.OnClickListener() {
+        ImageView img = (ImageView) findViewById(R.id.lamp);
+        img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "+1",Toast.LENGTH_SHORT).show();
                 increaseCounter();
 
             }
         });
 
 
-        //Google API klient som behövs för att skicka data till det speciella molnet.
+//        Google API klient som behövs för att skicka data till det speciella molnet.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle connectionHint) {
-                        Log.d(TAG, "onConnected: " + connectionHint);
-                        // Now you can use the Data Layer API
-                    }
-                    @Override
-                    public void onConnectionSuspended(int cause) {
-                        Log.d(TAG, "onConnectionSuspended: " + cause);
-                    }
-                })
-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(ConnectionResult result) {
-                        Log.d(TAG, "onConnectionFailed: " + result);
-                    }
-                })
-                        // Request access only to the Wearable API
+                .addConnectionCallbacks(this)
                 .addApi(Wearable.API)
                 .build();
         mGoogleApiClient.connect();
 
-
-
-
+//        Intent i = new Intent(MainActivity.this, DataLayerListenerService.class);
+////        Bundle b = new Bundle();
+////        Integer integer = new Integer(0);
+////        b.putSerializable("int", integer);
+////        i.putExtras(b);
+//        ServiceConnection mServiceConn = new ServiceConnection() {
+//
+//            @Override
+//            public void onServiceConnected(ComponentName name, IBinder service) {
+//                // We've bound to LocalService, cast the IBinder and get LocalService instance
+//                DataLayerListenerService.LocalBinder binder = (DataLayerListenerService.LocalBinder) service;
+//                mService = binder.getService();
+//                mBound = true;
+//            }
+//
+//            @Override
+//            public void onServiceDisconnected(ComponentName name) {
+//                mBound = false;
+//            }
+//        };
+//
+//        this.bindService(i,mServiceConn, Context.BIND_AUTO_CREATE);
+//        mService.increaseCounter();
 
 
 
@@ -156,7 +167,9 @@ public class MainActivity extends WearableActivity implements
     //method to update count
     private void updateCount(int c){
         count = c;
-        Toast.makeText(MainActivity.this, "nytt värde:"+count, Toast.LENGTH_LONG).show();
+        TextView tv = (TextView) findViewById(R.id.text);
+        tv.setText(count+"");
+        updateDisplay();
     }
 
     @Override
