@@ -17,10 +17,12 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataItemBuffer;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
@@ -57,6 +59,7 @@ public class MainActivity extends WearableActivity
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                increaseCounter();
                 increaseCounter();
 
             }
@@ -103,6 +106,7 @@ public class MainActivity extends WearableActivity
 
     private void increaseCounter() {
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/count");
+        putDataMapReq.setUrgent();
         putDataMapReq.getDataMap().putInt(COUNT_KEY, count++);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult =
@@ -124,6 +128,7 @@ public class MainActivity extends WearableActivity
     @Override
     public void onExitAmbient() {
         updateDisplay();
+        mGoogleApiClient.connect();
         super.onExitAmbient();
     }
 
@@ -141,6 +146,22 @@ public class MainActivity extends WearableActivity
     @Override
     public void onConnected(Bundle bundle) {
         Wearable.DataApi.addListener(mGoogleApiClient, this);
+        PendingResult<DataItemBuffer> results = Wearable.DataApi.getDataItems(mGoogleApiClient);
+        results.setResultCallback(new ResultCallback<DataItemBuffer>() {
+            @Override
+            public void onResult(DataItemBuffer dataItems) {
+                if (dataItems.getCount() != 0) {
+                    DataMapItem dataMapItem = DataMapItem.fromDataItem(dataItems.get(0));
+
+                    // This should read the correct value.
+                    int value = dataMapItem.getDataMap().getInt(COUNT_KEY);
+                    updateCount(value);
+                    //Toast.makeText(MainActivity.this, "hämtat värde:" + count, Toast.LENGTH_SHORT).show();
+                }
+
+                dataItems.release();
+            }
+        });
     }
 
     @Override
@@ -169,7 +190,6 @@ public class MainActivity extends WearableActivity
         count = c;
         TextView tv = (TextView) findViewById(R.id.text);
         tv.setText(count+"");
-        updateDisplay();
     }
 
     @Override

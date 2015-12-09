@@ -6,7 +6,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.watch.iot.iotlampcontroller"
+        applicationId "com.watch.iot.iotserver711"
         minSdkVersion 21
         targetSdkVersion 23
         versionCode 1
