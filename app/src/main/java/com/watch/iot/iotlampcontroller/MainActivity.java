@@ -45,7 +45,7 @@ public class MainActivity extends WearableActivity
     private GoogleApiClient mGoogleApiClient;
     private static final String COUNT_KEY = "com.example.key.count";
     private int count = 0;
-    public DataLayerListenerService mService;
+    //public DataLayerListenerService mService;
     private boolean mBound = false;
 
     @Override
@@ -125,6 +125,9 @@ public class MainActivity extends WearableActivity
         updateDisplay();
     }
 
+
+
+
     @Override
     public void onExitAmbient() {
         updateDisplay();
@@ -196,4 +199,12 @@ public class MainActivity extends WearableActivity
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
+
+    private void iconPwrOn(boolean b) {
+        ImageView img = (ImageView) findViewById(R.id.big_lightbulb);
+        if (b == true) img.setImageResource(R.drawable.big_lightbulb_on);
+        else img.setImageResource(R.drawable.big_lightbulb_off);
+    }
+
+
 }
