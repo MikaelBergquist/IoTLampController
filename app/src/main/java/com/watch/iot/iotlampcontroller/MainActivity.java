@@ -48,7 +48,25 @@ public class MainActivity extends WearableActivity
     private int id = -1;
     //public DataLayerListenerService mService;
     private boolean mBound = false;
-
+//    @Override
+//    public void onSaveInstanceState(Bundle savedInstanceState) {
+//        super.onSaveInstanceState(savedInstanceState);
+//
+//        if (savedInstanceState == null) {
+//            Log.d("Intent","savedInstanceState == null");
+//            Bundle extras = getIntent().getExtras();
+//            if(extras == null) {
+//                Log.d("Intent","idextras == null");
+//            } else {
+//                Log.d("Intent","savedInstanceState != null");
+//                id= extras.getInt("id");
+//            }
+//        } else {
+//            Log.d("Intent","savedInstanceState != null");
+//            id= (int) savedInstanceState.getInt("id");
+//        }
+//
+//    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,25 +78,14 @@ public class MainActivity extends WearableActivity
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                increaseCounter();
-                increaseCounter();
+//                increaseCounter();
+//                increaseCounter();
+                toggleLampLight();
 
             }
         });
 
-        if (savedInstanceState == null) {
-            Bundle extras = getIntent().getExtras();
-            if(extras == null) {
 
-            } else {
-                id= extras.getInt("id");
-                TextView tv = (TextView) findViewById(R.id.text);
-                tv.setText("intent:" + id);
-
-            }
-        } else {
-            id= (int) savedInstanceState.getSerializable("id");
-        }
 
 //        Google API klient som behövs för att skicka data till det speciella molnet.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -112,21 +119,58 @@ public class MainActivity extends WearableActivity
 //        mService.increaseCounter();
 
 
+        Intent intent= getIntent();
+        Bundle b = intent.getExtras();
+
+        if(b!=null){
+            id =(int) b.get("id");
+
+        }
+        TextView tv = (TextView) findViewById(R.id.text);
+        switch (id){
+            case 0: tv.setText("Lampa golv");
+            case 1: tv.setText("lampa fönster");
+
+        }
+
+        //se till att lampans bild reflekterar nuvarande status.
+    }
+    //Ändrar lampa med det aktiva id:t till på/av
+    private void toggleLampLight(){
+        //ändra count så att den passar nya värdet i 0..3
+        //denna 2^id get oss binära platsen(2 för id = 1 och 1 för id=0) och ^ gör xor på count för att flippa den biten
+        int tempCount = count^((int) Math.pow(2,id));
+
+
+        //skicka detta värdet till molnet
+        sendLampState(tempCount);
+        //uppdatera lampan
+        //bitwise and är == 0 om lampan skall vara av;
+        iconPwrOn((count & ((int) Math.pow(2,id))) == 0);
 
 
 
 
     }
 
-    private void increaseCounter() {
-        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/count");
-        putDataMapReq.setUrgent();
-        putDataMapReq.getDataMap().putInt(COUNT_KEY, count++);
-        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
-        PendingResult<DataApi.DataItemResult> pendingResult =
-                Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
-    }
 
+private void sendLampState(int tempCount) {
+    PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/count");
+    putDataMapReq.setUrgent();
+    putDataMapReq.getDataMap().putInt(COUNT_KEY, tempCount);
+    PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+    PendingResult<DataApi.DataItemResult> pendingResult =
+            Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
+}
+
+//    private void increaseCounter() {
+//        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/count");
+//        putDataMapReq.setUrgent();
+//        putDataMapReq.getDataMap().putInt(COUNT_KEY, count++);
+//        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+//        PendingResult<DataApi.DataItemResult> pendingResult =
+//                Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
+//    }
     @Override
     public void onEnterAmbient(Bundle ambientDetails) {
         super.onEnterAmbient(ambientDetails);
@@ -205,7 +249,8 @@ public class MainActivity extends WearableActivity
     //method to update count
     private void updateCount(int c){
         count = c;
-
+//        TextView tv = (TextView) findViewById(R.id.text);
+//        tv.setText(""+count);
     }
 
     @Override
