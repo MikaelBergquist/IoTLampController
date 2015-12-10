@@ -146,7 +146,7 @@ public class MainActivity extends WearableActivity
         sendLampState(tempCount);
         //uppdatera lampan
         //bitwise and är == 0 om lampan skall vara av;
-        iconPwrOn((count & ((int) Math.pow(2,id))) == 0);
+        iconPwrOn((tempCount & ((int) Math.pow(2,id))) != 0);
 
 
 
