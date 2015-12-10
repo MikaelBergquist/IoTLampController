@@ -127,11 +127,9 @@ public class MainActivity extends WearableActivity
 
         }
         TextView tv = (TextView) findViewById(R.id.text);
-        switch (id){
-            case 0: tv.setText("Lampa golv");
-            case 1: tv.setText("lampa fönster");
+            if(id==0){tv.setText("Lampa golv");}
+            if(id==1){tv.setText("lampa fönster");}
 
-        }
 
         //se till att lampans bild reflekterar nuvarande status.
     }
@@ -211,15 +209,20 @@ private void sendLampState(int tempCount) {
         results.setResultCallback(new ResultCallback<DataItemBuffer>() {
             @Override
             public void onResult(DataItemBuffer dataItems) {
-                if (dataItems.getCount() != 0) {
-                    DataMapItem dataMapItem = DataMapItem.fromDataItem(dataItems.get(0));
+//                if (dataItems.getCount() != 0) {
+                for (DataItem item : dataItems) {
+                    DataMapItem dataMapItem = DataMapItem.fromDataItem(item);
 
-                    // This should read the correct value.
-                    int value = dataMapItem.getDataMap().getInt(COUNT_KEY);
-                    updateCount(value);
-                    //Toast.makeText(MainActivity.this, "hämtat värde:" + count, Toast.LENGTH_SHORT).show();
+                    if (item.getUri().getPath().compareTo("/count") == 0) {
+                        // This should read the correct value.
+                        int value = dataMapItem.getDataMap().getInt(COUNT_KEY);
+                        updateCount(value);
+                        iconPwrOn((count & ((int) Math.pow(2, id))) != 0);
+//                        Toast.makeText(MainActivity.this, "hämtat värde:" + value, Toast.LENGTH_SHORT).show();
+
+                    }
+
                 }
-
                 dataItems.release();
             }
         });
